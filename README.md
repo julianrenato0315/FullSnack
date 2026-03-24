@@ -36,7 +36,10 @@ npm -v
 
 Now, you're ready to run our server:
 
-First, run the development server:
+First, install npm by running this command in the terminal:
+npm install
+
+Second, run the development server:
 
 ```bash
 npm run dev
