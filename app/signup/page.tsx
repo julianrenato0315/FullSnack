@@ -18,8 +18,8 @@ export default function SignupPage() {
     try {
       await createUserWithEmailAndPassword(auth, email, password)
       router.push("/")
-    } catch (e: any) {
-      setError(e.message)
+    } catch (e) {
+      setError((e as Error).message)
     }
     setLoading(false)
   }
@@ -31,17 +31,17 @@ export default function SignupPage() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSignup()}
+            onKeyDown={(e) => {if (e.key === "Enter") handleSignup()}}
           /><input
             className="auth-input"
             placeholder="Password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSignup()}
+            onKeyDown={(e) => { if (e.key === "Enter") handleSignup()}}
           />
 
-          {error && <p className="auth-error">{error}</p>}
+          {error ? <p className="auth-error">{error}</p>: null}
 
           <button
             className="btn btn--primary btn--full"

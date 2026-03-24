@@ -73,7 +73,7 @@ export default function Page() {
             className="search-bar__input"
             value={ingredients}
             onChange={(e) => setIngredients(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && search()}
+            onKeyDown={(e) => {if (e.key === "Enter") search()}}
             placeholder="Enter ingredients (e.g. chicken, garlic, tomatoes)"
           />
           <button className="btn btn--primary" style={{ padding: "7px 18px", fontSize: 13, flexShrink: 0 }} onClick={search}>
