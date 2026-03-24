@@ -1,6 +1,40 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
+First, make sure you have Node.js installed. 
+1. Check if Node is installed
+
+In your terminal, run:
+
+node -v
+If you get a version (like v20.x.x) → Node is installed → skip to Step 3
+If you get the same “not recognized” error → you need to install it
+
+2. Install Node.js (this will install npm too)
+
+Go here:
+👉 https://nodejs.org
+
+Download the LTS version (recommended)
+
+During install:
+
+✅ Make sure “Add to PATH” is checked
+
+3. Restart VS Code (or any other coding platform)
+
+After installing:
+
+Close VS Code completely
+Reopen it
+Open a new terminal
+
+Then test:
+
+node -v
+npm -v
+
+Now, you're ready to run our server:
 
 First, run the development server:
 
