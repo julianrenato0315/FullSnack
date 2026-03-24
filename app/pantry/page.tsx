@@ -42,6 +42,7 @@ export default function PantryPage() {
   }, [user])
 
   function handleNameChange(value: string) {
+    if (value.length > 0) value = value.charAt(0).toUpperCase() + value.slice(1)
     setName(value)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     if (!value.trim()) { setSuggestions([]); return }
@@ -53,7 +54,8 @@ export default function PantryPage() {
   }
 
   function pickSuggestion(suggestion: Suggestion) {
-    setName(suggestion.name)
+    const name = suggestion.name.charAt(0).toUpperCase() + suggestion.name.slice(1)
+    setName(name)
     setSuggestions([])
   }
 
