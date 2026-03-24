@@ -3,11 +3,11 @@ import { NextResponse } from "next/server"
 export async function GET(request: Request) {
     const url = new URL(request.url)
     const ingredientName = url.searchParams.get("ingredientName")
-    const sourceAmt = url.searchParams.get("sourceAmount")
+    const sourceAmount = url.searchParams.get("sourceAmount")
     const sourceUnit = url.searchParams.get("sourceUnit")
     const targetUnit = url.searchParams.get("targetUnit")
 
-    if (!ingredientName || !sourceAmt || !sourceUnit || !targetUnit) {
+    if (!ingredientName || !sourceAmount || !sourceUnit || !targetUnit) {
         return NextResponse.json({ error: "Missing parameters" }, { status: 400})
     }
 

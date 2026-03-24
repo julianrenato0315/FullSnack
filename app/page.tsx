@@ -40,6 +40,10 @@ export default function Page() {
         </Link>
 
         <div className="header__user">
+          <Link href="/pantry">
+            <button className="btn btn--outline" style={{ padding: "7px 16px", fontSize: 13 }}>Pantry</button>
+          </Link>
+
           {user ? (
             <>
               <span className="header__email">{user.email}</span>
