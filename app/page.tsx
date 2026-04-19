@@ -1,6 +1,7 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { auth } from '../lib/firebase'
+import { auth, db } from '../lib/firebase'
+import { collection, onSnapshot } from 'firebase/firestore'
 import { signOut, onAuthStateChanged, User } from 'firebase/auth'
 import Link from 'next/link'
 
@@ -13,20 +14,79 @@ type Recipe = {
   readyInMinutes?: number
 }
 
+type PantryItem = {
+  id: string
+  name: string
+}
+
 export default function Page() {
   const [ingredients, setIngredients] = useState("")
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
+  const [pantryLoading, setPantryLoading] = useState(false)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u))
     return () => unsub()
   }, [])
 
+  useEffect(() => {
+    if (!user) {
+      setPantryItems([])
+      return
+    }
+
+    setPantryLoading(true)
+    const ref = collection(db, 'users', user.uid, 'pantry')
+    const unsub = onSnapshot(ref, (snapshot) => {
+      setPantryItems(snapshot.docs.map((d) => ({ id: d.id, name: d.data().name as string })))
+      setPantryLoading(false)
+    }, () => {
+      setPantryLoading(false)
+    })
+
+    return () => unsub()
+  }, [user])
+
   async function search() {
     setLoading(true)
-    const response = await fetch("/api/recipes?ingredients=" + ingredients)
+    const response = await fetch("/api/recipes?ingredients=" + encodeURIComponent(ingredients))
+    const data = await response.json()
+    setRecipes(data)
+    setLoading(false)
+  }
+
+  function pickRandomPantryIngredients() {
+    const names = pantryItems.map((item) => item.name)
+    if (names.length === 0) return []
+    const count = Math.min(names.length, Math.max(1, Math.floor(Math.random() * Math.min(4, names.length)) + 1))
+    const selected: string[] = []
+    const copy = [...names]
+    while (selected.length < count && copy.length > 0) {
+      const index = Math.floor(Math.random() * copy.length)
+      selected.push(copy.splice(index, 1)[0])
+    }
+    return selected
+  }
+
+  async function generateFromPantry() {
+    if (!user) return
+    if (pantryItems.length === 0) {
+      alert('Your pantry is empty. Add ingredients first to generate recipes.')
+      return
+    }
+
+    const chosen = pickRandomPantryIngredients()
+    if (chosen.length === 0) {
+      alert('Could not select ingredients from your pantry.')
+      return
+    }
+
+    setIngredients(chosen.join(', '))
+    setLoading(true)
+    const response = await fetch(`/api/recipes?ingredients=${encodeURIComponent(chosen.join(', '))}`)
     const data = await response.json()
     setRecipes(data)
     setLoading(false)
@@ -79,6 +139,16 @@ export default function Page() {
           <button className="btn btn--primary" style={{ padding: "7px 18px", fontSize: 13, flexShrink: 0 }} onClick={search}>
             {loading ? "Searching..." : "Search"}
           </button>
+          {user && (
+            <button
+              className="btn btn--outline"
+              style={{ padding: "7px 18px", fontSize: 13, flexShrink: 0, marginLeft: 12, backgroundColor: "#000", color: "#fff", borderColor: "#000" }}
+              onClick={generateFromPantry}
+              disabled={loading || pantryLoading || pantryItems.length === 0}
+            >
+              {pantryLoading ? "Loading pantry..." : `Generate from pantry${pantryItems.length === 0 ? ' (empty)' : ''}`}
+            </button>
+          )}
         </div>
 
         {recipes.length > 0 && (
