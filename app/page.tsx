@@ -4,6 +4,7 @@ import { auth, db } from '../lib/firebase'
 import { collection, onSnapshot } from 'firebase/firestore'
 import { signOut, onAuthStateChanged, User } from 'firebase/auth'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type Recipe = {
   id: number
@@ -20,12 +21,14 @@ type PantryItem = {
 }
 
 export default function Page() {
+  const router = useRouter()
   const [ingredients, setIngredients] = useState("")
   const [recipes, setRecipes] = useState<Recipe[]>([])
   const [loading, setLoading] = useState(false)
   const [user, setUser] = useState<User | null>(null)
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
   const [pantryLoading, setPantryLoading] = useState(false)
+  const [randomLoading, setRandomLoading] = useState(false)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u))
@@ -71,6 +74,14 @@ export default function Page() {
     return selected
   }
 
+  async function goToRandomRecipe() {
+    setRandomLoading(true)
+    const res = await fetch('/api/recipes?random=true')
+    const data = await res.json()
+    setRandomLoading(false)
+    if (data.id) router.push(`/recipe/${data.id}`)
+  }
+
   async function generateFromPantry() {
     if (!user) return
     if (pantryItems.length === 0) {
@@ -100,6 +111,9 @@ export default function Page() {
         </Link>
 
         <div className="header__user">
+          <button className="btn btn--outline btn--header" onClick={goToRandomRecipe} disabled={randomLoading}>
+            {randomLoading ? "Loading..." : "Random Recipe"}
+          </button>
           <Link href="/pantry">
             <button className="btn btn--outline btn--header">Pantry</button>
           </Link>
