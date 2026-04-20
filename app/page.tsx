@@ -19,6 +19,21 @@ type PantryItem = {
   name: string
 }
 
+type RecipeDetails = {
+  id: number
+  title: string
+  image: string
+  servings?: number
+  readyInMinutes?: number
+  instructions?: string
+  extendedIngredients?: Array<{
+    id: number
+    name: string
+    amount: number
+    unit: string
+  }>
+}
+
 export default function Page() {
   const [ingredients, setIngredients] = useState("")
   const [recipes, setRecipes] = useState<Recipe[]>([])
@@ -26,6 +41,8 @@ export default function Page() {
   const [user, setUser] = useState<User | null>(null)
   const [pantryItems, setPantryItems] = useState<PantryItem[]>([])
   const [pantryLoading, setPantryLoading] = useState(false)
+  const [selectedRecipe, setSelectedRecipe] = useState<RecipeDetails | null>(null)
+  const [loadingDetails, setLoadingDetails] = useState(false)
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u))
@@ -56,6 +73,29 @@ export default function Page() {
     const data = await response.json()
     setRecipes(data)
     setLoading(false)
+  }
+
+  async function viewRecipe(recipeId: number) {
+    if (!user) {
+      alert("Please sign in to view recipe details.")
+      return
+    }
+
+    setLoadingDetails(true)
+    try {
+      const response = await fetch(`/api/recipes/${recipeId}`)
+      const data = await response.json()
+      if (!response.ok || !data || data.error) {
+        alert(data?.error || "Unable to load recipe details.")
+        setSelectedRecipe(null)
+      } else {
+        setSelectedRecipe(data)
+      }
+    } catch (error) {
+      alert("Failed to load recipe details.")
+      setSelectedRecipe(null)
+    }
+    setLoadingDetails(false)
   }
 
   function pickRandomPantryIngredients() {
@@ -156,7 +196,7 @@ export default function Page() {
             <p className="results-header__subtitle" style={{ marginBottom: "1rem" }}>Found {recipes.length} results</p>
             <div className="recipe-grid">
               {recipes.map((recipe) => (
-                <div key={recipe.id} className="card card--recipe">
+                <div key={recipe.id} className="card card--recipe" onClick={() => viewRecipe(recipe.id)} style={{ cursor: "pointer" }}>
                   <div className="recipe-card__image-wrap">
                     {recipe.image
                       ? <img className="recipe-card__image" src={recipe.image} alt={recipe.title} />
@@ -181,6 +221,42 @@ export default function Page() {
           </div>
         )}
       </main>
+
+      {selectedRecipe && (
+        <div className="recipe-details" style={{ marginTop: "2rem", padding: "2rem", border: "1px solid #ddd", borderRadius: "8px" }}>
+          <button onClick={() => setSelectedRecipe(null)} style={{ float: "right", background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer" }}>×</button>
+          <h2>{selectedRecipe.title}</h2>
+          {selectedRecipe.image && (
+            <img src={selectedRecipe.image} alt={selectedRecipe.title} style={{ width: "100%", maxWidth: 400, height: 240, objectFit: "cover", borderRadius: "8px", marginBottom: "1rem" }} />
+          )}
+          <p><strong>Servings:</strong> {selectedRecipe.servings ?? "—"}</p>
+          <p><strong>Ready in:</strong> {selectedRecipe.readyInMinutes ? `${selectedRecipe.readyInMinutes} minutes` : "—"}</p>
+          {selectedRecipe.extendedIngredients?.length ? (
+            <>
+              <h3>Ingredients:</h3>
+              <ul>
+                {selectedRecipe.extendedIngredients.map((ing) => (
+                  <li key={ing.id}>{ing.amount} {ing.unit} {ing.name}</li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p>No ingredient details available.</p>
+          )}
+          <h3>Instructions:</h3>
+          {selectedRecipe.instructions ? (
+            <div dangerouslySetInnerHTML={{ __html: selectedRecipe.instructions }} />
+          ) : (
+            <p>No instructions available for this recipe.</p>
+          )}
+        </div>
+      )}
+
+      {loadingDetails && (
+        <div style={{ marginTop: "2rem", textAlign: "center" }}>
+          <p>Loading recipe details...</p>
+        </div>
+      )}
     </div>
   )
 }
