@@ -101,7 +101,7 @@ export default function Page() {
 
         <div className="header__user">
           <Link href="/pantry">
-            <button className="btn btn--outline" style={{ padding: "7px 16px", fontSize: 13 }}>Pantry</button>
+            <button className="btn btn--outline btn--header">Pantry</button>
           </Link>
 
           {user ? (
@@ -112,8 +112,8 @@ export default function Page() {
             </>
           ) : (
             <>
-              <Link href="/login"><button className="btn btn--outline" style={{ padding: "7px 16px", fontSize: 13 }}>Log in</button></Link>
-              <Link href="/signup"><button className="btn btn--primary" style={{ padding: "7px 16px", fontSize: 13 }}>Sign up</button></Link>
+              <Link href="/login"><button className="btn btn--outline btn--header">Log in</button></Link>
+              <Link href="/signup"><button className="btn btn--primary btn--header">Sign up</button></Link>
             </>
           )}
         </div>
@@ -136,13 +136,12 @@ export default function Page() {
             onKeyDown={(e) => {if (e.key === "Enter") search()}}
             placeholder="Enter ingredients (e.g. chicken, garlic, tomatoes)"
           />
-          <button className="btn btn--primary" style={{ padding: "7px 18px", fontSize: 13, flexShrink: 0 }} onClick={search}>
+          <button className="btn btn--primary btn--header" style={{ flexShrink: 0 }} onClick={search}>
             {loading ? "Searching..." : "Search"}
           </button>
           {user && (
             <button
-              className="btn btn--outline"
-              style={{ padding: "7px 18px", fontSize: 13, flexShrink: 0, marginLeft: 12, backgroundColor: "#000", color: "#fff", borderColor: "#000" }}
+              className="btn btn--header btn--generate"
               onClick={generateFromPantry}
               disabled={loading || pantryLoading || pantryItems.length === 0}
             >
@@ -156,7 +155,8 @@ export default function Page() {
             <p className="results-header__subtitle" style={{ marginBottom: "1rem" }}>Found {recipes.length} results</p>
             <div className="recipe-grid">
               {recipes.map((recipe) => (
-                <div key={recipe.id} className="card card--recipe">
+                <Link key={recipe.id} href={`/recipe/${recipe.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                <div className="card card--recipe" style={{ cursor: "pointer" }}>
                   <div className="recipe-card__image-wrap">
                     {recipe.image
                       ? <img className="recipe-card__image" src={recipe.image} alt={recipe.title} />
@@ -176,6 +176,7 @@ export default function Page() {
                     </div>
                   </div>
                 </div>
+                </Link>
               ))}
             </div>
           </div>

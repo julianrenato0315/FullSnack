@@ -111,8 +111,8 @@ export default function PantryPage() {
             </>
           ) : (
             <>
-              <Link href="/login"><button className="btn btn--outline" style={{ padding: "7px 16px", fontSize: 13 }}>Log in</button></Link>
-              <Link href="/signup"><button className="btn btn--primary" style={{ padding: "7px 16px", fontSize: 13 }}>Sign up</button></Link>
+              <Link href="/login"><button className="btn btn--outline btn--header">Log in</button></Link>
+              <Link href="/signup"><button className="btn btn--primary btn--header">Sign up</button></Link>
             </>
           )}
         </div>
